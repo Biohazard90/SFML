@@ -98,6 +98,13 @@ public:
     ////////////////////////////////////////////////////////////
     ~Music();
 
+    enum OpenResult
+    {
+        OPEN_SUCCESS = 0,
+        OPEN_UNSUPPORTED_FORMAT,
+        OPEN_NO_AUDIO_DEVICE,
+    };
+
     ////////////////////////////////////////////////////////////
     /// \brief Open a music from an audio file
     ///
@@ -140,7 +147,7 @@ public:
     /// \see openFromFile, openFromStream
     ///
     ////////////////////////////////////////////////////////////
-    bool openFromMemory(const void* data, std::size_t sizeInBytes);
+    OpenResult openFromMemory(const void* data, std::size_t sizeInBytes);
 
     ////////////////////////////////////////////////////////////
     /// \brief Open a music from an audio file in a custom stream

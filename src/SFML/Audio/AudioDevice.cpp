@@ -30,6 +30,7 @@
 #include <SFML/Audio/Listener.hpp>
 #include <SFML/System/Err.hpp>
 #include <vector>
+#include <assert.h>
 
 #if defined(__APPLE__)
     #if defined(__clang__)
@@ -107,6 +108,12 @@ AudioDevice::~AudioDevice()
 }
 
 
+bool AudioDevice::isValid()
+{
+    return audioDevice != nullptr && audioContext != nullptr;
+}
+
+
 ////////////////////////////////////////////////////////////
 bool AudioDevice::isExtensionSupported(const std::string& extension)
 {
@@ -132,17 +139,8 @@ bool AudioDevice::isExtensionSupported(const std::string& extension)
 ////////////////////////////////////////////////////////////
 int AudioDevice::getFormatFromChannelCount(unsigned int channelCount)
 {
-    // Create a temporary audio device in case none exists yet.
-    // This device will not be used in this function and merely
-    // makes sure there is a valid OpenAL device for format
-    // queries if none has been created yet.
-    //
-    // Using an std::vector for this since auto_ptr is deprecated
-    // and we have no better STL facility for dynamically allocating
-    // a temporary instance with strong exception guarantee.
-    std::vector<AudioDevice> device;
-    if (!audioDevice)
-        device.resize(1);
+    // This should only be called from AlResources, meanting the audio device is valid
+    assert(audioDevice);
 
     // Find the good format according to the number of channels
     int format = 0;

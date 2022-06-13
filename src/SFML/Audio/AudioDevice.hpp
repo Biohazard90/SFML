@@ -59,6 +59,9 @@ public:
     ////////////////////////////////////////////////////////////
     ~AudioDevice();
 
+    // Allow AlResources to check whether the underlying audio device is available and valid.
+    static bool isValid();
+
     ////////////////////////////////////////////////////////////
     /// \brief Check if an OpenAL extension is supported
     ///

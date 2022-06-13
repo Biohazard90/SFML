@@ -26,6 +26,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Audio/Music.hpp>
+#include <SFML/Audio/AudioDevice.hpp>
 #include <SFML/Audio/ALCheck.hpp>
 #include <SFML/System/Lock.hpp>
 #include <SFML/System/Err.hpp>
@@ -77,19 +78,22 @@ bool Music::openFromFile(const std::string& filename)
 
 
 ////////////////////////////////////////////////////////////
-bool Music::openFromMemory(const void* data, std::size_t sizeInBytes)
+Music::OpenResult Music::openFromMemory(const void* data, std::size_t sizeInBytes)
 {
     // First stop the music if it was already running
     stop();
 
+    if (!sf::priv::AudioDevice::isValid())
+        return OPEN_NO_AUDIO_DEVICE;
+
     // Open the underlying sound file
     if (!m_file.openFromMemory(data, sizeInBytes))
-        return false;
+        return OPEN_UNSUPPORTED_FORMAT;
 
     // Perform common initializations
     initialize();
 
-    return true;
+    return OPEN_SUCCESS;
 }
 
 
