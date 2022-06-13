@@ -395,9 +395,8 @@ void SoundStream::streamData()
             }
         }
 
-        // Leave some time for the other threads if the stream is still playing
-        if (SoundSource::getStatus() != Stopped)
-            sleep(m_processingInterval);
+        // OpenAL can cause this loop to run unhinged without producing any errors, so slow down.
+        sleep(m_processingInterval);
     }
 
     // Stop the playback
