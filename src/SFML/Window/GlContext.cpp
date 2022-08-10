@@ -27,7 +27,6 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/GlContext.hpp>
 #include <SFML/Window/Context.hpp>
-#include <SFML/Window/EglContext.hpp>
 #include <SFML/System/ThreadLocalPtr.hpp>
 #include <SFML/System/Mutex.hpp>
 #include <SFML/System/Lock.hpp>
@@ -48,6 +47,7 @@
 
     #if defined(SFML_OPENGL_ES)
 
+        #include <SFML/Window/EglContext.hpp>
         typedef sf::priv::EglContext ContextType;
 
     #else
@@ -59,14 +59,15 @@
 
 #elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD)
 
-    #if defined(SFML_OPENGL_ES)
-
-        typedef sf::priv::EglContext ContextType;
-
-    #elif defined(SFML_USE_DRM)
+    #if defined(SFML_USE_DRM)
 
         #include <SFML/Window/DRM/DRMContext.hpp>
         typedef sf::priv::DRMContext ContextType;
+
+    #elif defined(SFML_OPENGL_ES)
+
+        #include <SFML/Window/EglContext.hpp>
+        typedef sf::priv::EglContext ContextType;
 
     #else
 
@@ -87,6 +88,7 @@
 
 #elif defined(SFML_SYSTEM_ANDROID)
 
+    #include <SFML/Window/EglContext.hpp>
     typedef sf::priv::EglContext ContextType;
 
 #endif

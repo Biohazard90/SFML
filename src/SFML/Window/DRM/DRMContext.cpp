@@ -28,7 +28,6 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/DRM/DRMContext.hpp>
 #include <SFML/Window/DRM/WindowImplDRM.hpp>
-#include <SFML/OpenGL.hpp>
 #include <SFML/System/Err.hpp>
 #include <SFML/System/Sleep.hpp>
 #include <cerrno>
@@ -36,6 +35,14 @@
 #include <cstring>
 #include <poll.h>
 #include <unistd.h>
+
+// We check for this definition in order to avoid multiple definitions of GLAD
+// entities during unity builds of SFML.
+#ifndef SF_GLAD_EGL_IMPLEMENTATION_INCLUDED
+#define SF_GLAD_EGL_IMPLEMENTATION_INCLUDED
+#define SF_GLAD_EGL_IMPLEMENTATION
+#include <glad/egl.h>
+#endif
 
 namespace
 {
@@ -168,10 +175,14 @@ namespace
 
         if (display == EGL_NO_DISPLAY)
         {
-            display = eglCheck(eglGetDisplay(reinterpret_cast<EGLNativeDisplayType>(gbmDevice)));
+            gladLoaderLoadEGL(EGL_NO_DISPLAY);
+
+            eglCheck(display = eglGetDisplay(reinterpret_cast<EGLNativeDisplayType>(gbmDevice)));
 
             EGLint major, minor;
             eglCheck(eglInitialize(display, &major, &minor));
+
+            gladLoaderLoadEGL(display);
 
 #if defined(SFML_OPENGL_ES)
             if (!eglBindAPI(EGL_OPENGL_ES_API))
@@ -295,7 +306,8 @@ m_scanOut    (false)
 DRMContext::~DRMContext()
 {
     // Deactivate the current context
-    EGLContext currentContext = eglCheck(eglGetCurrentContext());
+    EGLContext currentContext;
+    eglCheck(currentContext = eglGetCurrentContext());
 
     if (currentContext == m_context)
     {
@@ -427,7 +439,7 @@ void DRMContext::createContext(DRMContext* shared)
         eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
     // Create EGL context
-    m_context = eglCheck(eglCreateContext(m_display, m_config, toShared, contextVersion));
+    eglCheck(m_context = eglCreateContext(m_display, m_config, toShared, contextVersion));
     if (m_context == EGL_NO_CONTEXT)
         err() << "Failed to create EGL context" << std::endl;
 }
@@ -458,7 +470,7 @@ void DRMContext::createSurface(unsigned int width, unsigned int height, unsigned
     m_width = width;
     m_height = height;
 
-    m_surface = eglCheck(eglCreateWindowSurface(m_display, m_config, reinterpret_cast<EGLNativeWindowType>(m_gbmSurface), NULL));
+    eglCheck(m_surface = eglCreateWindowSurface(m_display, m_config, reinterpret_cast<EGLNativeWindowType>(m_gbmSurface), NULL));
 
     if (m_surface == EGL_NO_SURFACE)
     {
