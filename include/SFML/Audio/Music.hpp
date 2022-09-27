@@ -287,6 +287,8 @@ private:
     std::vector<Int16> m_samples;  //!< Temporary buffer of samples
     Mutex              m_mutex;    //!< Mutex protecting the data
     Span<Uint64>       m_loopSpan; //!< Loop Range Specifier
+
+    bool reachedEOF = false;
 };
 
 } // namespace sf

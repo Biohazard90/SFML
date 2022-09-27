@@ -207,6 +207,8 @@ bool Music::onGetData(SoundStream::Chunk& data)
     data.sampleCount = static_cast<std::size_t>(m_file.read(&m_samples[0], toFill));
     currentOffset += data.sampleCount;
 
+    reachedEOF = data.sampleCount == 0;
+
     // Check if we have stopped obtaining samples or reached either the EOF or the loop end point
     return (data.sampleCount != 0) && (currentOffset < m_file.getSampleCount()) && !(currentOffset == loopEnd && m_loopSpan.length != 0);
 }
@@ -230,11 +232,13 @@ Int64 Music::onLoop()
     {
         // Looping is enabled, and either we're at the loop end, or we're at the EOF
         // when it's equivalent to the loop end (loop end takes priority). Send us to loop begin
+        reachedEOF = false;
         m_file.seek(m_loopSpan.offset);
         return static_cast<Int64>(m_file.getSampleOffset());
     }
-    else if (getLoop() && (currentOffset >= m_file.getSampleCount()))
+    else if (getLoop() && (currentOffset >= m_file.getSampleCount() || reachedEOF))
     {
+        reachedEOF = false;
         // If we're at the EOF, reset to 0
         m_file.seek(0);
         return 0;
